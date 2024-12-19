@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI上新图片与url核对工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        main {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .input-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .input-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        h3 {
+            margin-bottom: 10px;
+        }
+        .image-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-section {
+            flex: 1;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .divider {
+            width: 2px;
+            background-color: #ddd;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .image-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            max-width: 100%;
+            max-height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .url-text {
+            font-size: 12px;
+            word-wrap: break-word;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .copy-button {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background-color: #218838;
+        }
+        .no-image {
+            color: red;
+        }
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            background-color: #007bff;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Shopify 图片URL核对工具</h1>
+    </header>
+    <main>
+        <div class="input-container">
+            <div class="input-box">
+                <h3>根据规则生成的URL</h3>
+                <textarea id="urlInput1" rows="5" placeholder="输入图片URL，每行一个"></textarea>
+            </div>
+            <div class="input-box">
+                <h3>该SKU所有的图片URL</h3>
+                <textarea id="urlInput2" rows="5" placeholder="输入图片URL，每行一个"></textarea>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="displayBtn">显示图片</button>
+        </div>
+
+        <div class="image-container">
+            <div class="image-section" id="section1">
+                <div class="section-title">根据规则生成的URL图片</div>
+                <div class="image-grid" id="imageGrid1"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="image-section" id="section2">
+                <div class="section-title">该SKU所有的图片</div>
+                <div class="image-grid" id="imageGrid2"></div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2024 凯帝丽莎AI Team. 保留所有权利.</p>
+    </footer>
+
+    <script>
+        function displayImages(urlInputId, gridId) {
+            const urls = document.getElementById(urlInputId).value.split('\n');
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = ''; // 清空之前的内容
+
+            urls.forEach(url => {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+
+                // 创建URL文本
+                const urlText = document.createElement('div');
+                urlText.textContent = url.trim() || "空链接";
+                urlText.className = 'url-text';
+
+                // 创建图片预览
+                if (!url.trim()) {
+                    const noImageText = document.createElement('div');
+                    noImageText.textContent = '该链接没有图片';
+                    noImageText.className = 'no-image';
+                    item.appendChild(noImageText);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = url.trim();
+                    img.alt = "图片加载失败";
+                    img.onerror = () => {
+                        img.style.display = 'none';
+                        const errorText = document.createElement('div');
+                        errorText.textContent = '图片加载失败';
+                        errorText.className = 'no-image';
+                        item.appendChild(errorText);
+                    };
+                    item.appendChild(img);
+
+                    // 添加复制按钮
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = '复制链接';
+                    copyButton.className = 'copy-button';
+                    copyButton.addEventListener('click', () => {
+                        navigator.clipboard.writeText(url.trim()).then(() => {
+                            alert('链接已复制: ' + url.trim());
+                        }).catch(err => {
+                            alert('复制失败: ' + err);
+                        });
+                    });
+                    item.appendChild(copyButton);
+                }
+
+                item.appendChild(urlText);
+                grid.appendChild(item);
+            });
+        }
+
+        document.getElementById('displayBtn').addEventListener('click', () => {
+            displayImages('urlInput1', 'imageGrid1');
+            displayImages('urlInput2', 'imageGrid2');
+        });
+    </script>
+</body>
+</html>
